@@ -5,6 +5,7 @@ import com.zeldev.ride_service.dto.RideResponse;
 import com.zeldev.ride_service.model.Ride;
 
 import static com.zeldev.ride_service.enumeration.RideStatus.REQUESTED;
+import static java.lang.Math.*;
 
 public class RideUtils {
 
@@ -41,5 +42,27 @@ public class RideUtils {
                 .rideStartedAt(ride.getRideStartedAt())
                 .rideFinishedAt(ride.getRideFinishedAt())
                 .build();
+    }
+
+    private static double calculateEstimatedFare(RideRequest request) {
+        //simplified haversine distance calculation
+        double lat1 = toRadians(request.pickupLatitude());
+        double lat2 = toRadians(request.dropOffLatitude());
+
+        double lon1 = toRadians(request.pickupLongitude());
+        double lon2 = toRadians(request.dropOffLongitude());
+
+        double diffLat = lat2 - lat1;
+        double diffLon = lon2 - lon1;
+
+        double calcResult = pow(sin(diffLat / 2), 2) + cos(lat1) * cos(lat2) * pow(sin(diffLon / 2), 2);
+
+        double calcResult2 = 2 * asin(sqrt(calcResult));
+        double distanceInKm = 6371 * calcResult2;
+
+        //base fare: R$5,00 + R$2,00 per km
+        double fare = 5 + (distanceInKm * 2);
+
+        return round(fare * 100.0) / 100.0;
     }
 }

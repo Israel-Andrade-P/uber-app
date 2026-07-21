@@ -35,7 +35,7 @@ public class RideController {
 
     @GetMapping("/rider/{id}")
     public ResponseEntity<List<RideResponse>> getRidesByRider(@PathVariable("id") String riderId) {
-        return ResponseEntity.status(OK).body(rideService.getRidesByRide(riderId));
+        return ResponseEntity.status(OK).body(rideService.getRidesByRider(riderId));
     }
 
     @PutMapping("/{ride_id}/start")
