@@ -1,9 +1,6 @@
-package com.zeldev.ride_service.event;
+package com.zeldev.matching_service.event;
 
-import lombok.Builder;
-
-@Builder
-public record RideRequestedEvent (
+public record RideRequestedEvent(
         String rideId,
         String riderId,
         double pickupLatitude,
