@@ -11,23 +11,23 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - rideshare-network
+      - uber-network
 
   # ─────────────────────────────────────────
   # MYSQL — Ride Data Storage
   # ─────────────────────────────────────────
   mysql:
     image: mysql:8.0
-    container_name: mysql-rideshare
+    container_name: mysql-uber
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ride_db
+      MYSQL_ROOT_PASSWORD: cheese
+      MYSQL_DATABASE: uberapp
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
-      - rideshare-network
+      - uber-network
 
   # ─────────────────────────────────────────
   # ZOOKEEPER — Required by Kafka
@@ -41,7 +41,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     networks:
-      - rideshare-network
+      - uber-network
 
   # ─────────────────────────────────────────
   # KAFKA — Event Streaming
@@ -62,11 +62,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks:
-      - rideshare-network
+      - uber-network
 
 volumes:
   mysql-data:
 
 networks:
-  rideshare-network:
+  uber-network:
     driver: bridge
