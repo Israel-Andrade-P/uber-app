@@ -71,6 +71,6 @@ public class LocationService {
 
     public void removeDriver(String driverId) {
         log.info("Removing driver {}", driverId);
-        redisTemplate.opsForGeo().remove(driverId);
+        redisTemplate.opsForGeo().remove(DRIVERS_GEO_KEY, driverId);
     }
 }

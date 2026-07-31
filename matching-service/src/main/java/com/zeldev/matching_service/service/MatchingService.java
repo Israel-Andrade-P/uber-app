@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,10 +21,11 @@ import static com.zeldev.matching_service.utils.EventUtils.createRideMatchedEven
 @Slf4j
 public class MatchingService {
     private final LocationServiceClient locationServiceClient;
-    private final KafkaTemplate<String, RideMatchedEvent> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     private static final String RIDE_MATCHED_TOPIC = "ride.matched";
-    private static final double DEFAULT_SEARCH_RADIUS_KM = 5.0;
+    private static final double DEFAULT_SEARCH_RADIUS_KM = 50.0;
 
     public void matchDriverToRide(RideRequestedEvent event) {
         List<NearbyDriverResponse> drivers = locationServiceClient.getNearbyDrivers(event.pickupLatitude(), event.pickupLongitude(), DEFAULT_SEARCH_RADIUS_KM);
@@ -42,10 +44,12 @@ public class MatchingService {
 
         NearbyDriverResponse assignedDriver = closestDriver.get();
 
-        var matchedEvent = createRideMatchedEvent(event, assignedDriver);
+        RideMatchedEvent matchedEvent = createRideMatchedEvent(event, assignedDriver);
 
-        kafkaTemplate.send(RIDE_MATCHED_TOPIC, event.rideId(), matchedEvent);
-        log.info("RideMatchedEvent published");
+        String json = objectMapper.writeValueAsString(matchedEvent);
+
+        kafkaTemplate.send(RIDE_MATCHED_TOPIC, event.rideId(), json);
+        log.info("RideMatchedEvent published for rider {} with driver {}", matchedEvent.riderId(), matchedEvent.driverId());
     }
 
     /*

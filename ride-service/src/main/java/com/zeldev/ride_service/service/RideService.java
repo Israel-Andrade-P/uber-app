@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -28,7 +29,8 @@ import static java.time.LocalDateTime.now;
 @Slf4j
 public class RideService {
     private final RideRepository rideRepository;
-    private final KafkaTemplate<String, RideRequestedEvent> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     private static final String RIDE_REQUESTED_TOPIC = "ride.requested";
 
@@ -41,7 +43,10 @@ public class RideService {
         //publish a kafka event for matching service to consume it and find nearest driver
         RideRequestedEvent event = createRideRequestedEvent(savedRide);
 
-        kafkaTemplate.send(RIDE_REQUESTED_TOPIC, savedRide.getId(), event);
+        //Manual serialization cause kafka serializer is broken
+        String json = objectMapper.writeValueAsString(event);
+
+        kafkaTemplate.send(RIDE_REQUESTED_TOPIC, savedRide.getId(), json);
         log.info("RideRequestedEvent published for ride {}", savedRide.getId());
 
         savedRide.setStatus(MATCHING);
